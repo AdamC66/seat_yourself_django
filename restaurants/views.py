@@ -5,6 +5,7 @@ from django.shortcuts import render, reverse, redirect, get_object_or_404
 from django.views.decorators.http import require_http_methods
 from restaurants.forms import LoginForm, ProfileForm, ReservationForm, RestaurantForm
 from restaurants.models import Category, Profile, Restaurant
+from datetime import datetime, timedelta
 
 def restaurants_list(request):
     restaurants = Restaurant.objects.all()
@@ -17,11 +18,16 @@ def restaurant_show(request, id):
     if request.user.is_authenticated:
         context['reservations'] = restaurant.reservations.filter(user=request.user)
         context['reservation_form'] = ReservationForm()
+    if request.user == restaurant.owner:
+        start_date = datetime.today()
+        end_date = start_date + timedelta(weeks=26)
+        restaurant.reservations.filter(date__range=[start_date, end_date])
+        context["vip"] = restaurant.reservations.raw("SELECT * FROM user WHERE COUNT >= 3 AND date < %s" %(end_date)) 
     return render(request, 'restaurant_details.html', context)
 
 @login_required
 def restaurant_edit(request, id):
-    restaurant = Restaurant.objects.get(pk=id)
+    restaurant = get_object_or_404(Restaurant, pk=id, owner=request.user.pk)
     if request.method == 'POST':
         form = RestaurantForm(request.POST, instance=restaurant)
         if form.is_valid():

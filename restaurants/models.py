@@ -44,6 +44,7 @@ class Restaurant(models.Model):
     description = models.TextField(null=True)
     opening_time = models.TimeField()
     closing_time = models.TimeField()
+    last_res_time = models.TimeField(null=True)
 
     def __str__(self):
         return self.name

@@ -2,6 +2,16 @@
 {% block content %}
 <main class='restaurant'>
     <h2>{{ restaurant.name }}</h2>
+    <h1>{{ vip.first }}</h1>
+    <div>
+      <ul>
+        <li>Address: {{ restaurant.address }}</li>
+        <li>{{ restaurant.opening_time }} - {{ restaurant.closing_time }}</li>
+        <li>Ph: {{ restaurant.phone }}</li>
+        <li>{{ restaurant.description }}</li>
+        <li><img style="max-width: 90%;" src="{{ restaurant.image }}" alt="picture of the restaurant"></li>
+      </ul>
+    </div>
     {% if user.is_authenticated %}
       {% if restaurant.owner == user %}
       <p> <a href="{% url 'restaurant_edit' id=restaurant.pk %}">Edit restaurant details</a> </p>
@@ -21,20 +31,20 @@
           <p>No upcoming reservations</p>
         {% endif %}
       {% endif %}
+        {% if reservations and restaurant.owner != user %}
+        <ol>
+          {% for reservation in reservations %}
+          <li>
+                <p> <time datetime="{{ reservation.date_and_time }}">{{ reservation.date }} at {{ reservation.time }} </time> </p>
+                <p> {{ reservation.user.profile.last_name }}, party of {{ reservation.party_size }} </p>
+                {% if reservation.notes %}
+                  <p class='notes'>{{ reservation.notes }}</p>
+                {% endif %}
+          </li>
+          {% endfor %}
+        </ol>
+        {% endif %}
 
-      {% if reservations %}
-      <ol>
-        {% for reservation in reservations %}
-        <li>
-              <p> <time datetime="{{ reservation.date_and_time }}">{{ reservation.date }} at {{ reservation.time }} </time> </p>
-              <p> {{ reservation.user.profile.last_name }}, party of {{ reservation.party_size }} </p>
-              {% if reservation.notes %}
-                <p class='notes'>{{ reservation.notes }}</p>
-              {% endif %}
-        </li>
-        {% endfor %}
-      </ol>
-      {% endif %}
       <form method='POST' action="{% url 'reservation_create' restaurant_id=restaurant.pk%}">
         {% csrf_token %}
         {{ reservation_form.as_p }}
