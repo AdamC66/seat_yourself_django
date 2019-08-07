@@ -19,10 +19,10 @@ def restaurant_show(request, id):
         context['reservations'] = restaurant.reservations.filter(user=request.user)
         context['reservation_form'] = ReservationForm()
     if request.user == restaurant.owner:
-        start_date= datetime.today()
-        end_date = start_date - datetime.timedelta(months=6) 
+        start_date = datetime.today()
+        end_date = start_date + timedelta(weeks=26)
         restaurant.reservations.filter(date__range=[start_date, end_date])
-
+        context["vip"] = restaurant.reservations.raw("SELECT * FROM user WHERE COUNT >= 3 AND date < %s" %(end_date)) 
     return render(request, 'restaurant_details.html', context)
 
 @login_required

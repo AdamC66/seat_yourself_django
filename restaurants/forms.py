@@ -17,7 +17,7 @@ class ReservationForm(ModelForm):
         fields = ['party_size', 'date', 'time', 'notes']
 
     def clean_time(self):
-        cleaned_time =  self.cleaned_data['time']
+        cleaned_time = self.cleaned_data['time']
         restaurant = self.instance.restaurant
         closing = restaurant.closing_time
         opening = restaurant.opening_time
@@ -77,6 +77,7 @@ class RestaurantForm(ModelForm):
     image = URLField()
     description = Textarea()
     category = ModelChoiceField(queryset=Category.objects.all())
+
 
     class Meta:
         model = Restaurant
