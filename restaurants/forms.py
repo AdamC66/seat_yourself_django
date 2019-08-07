@@ -21,14 +21,17 @@ class ReservationForm(ModelForm):
         restaurant = self.instance.restaurant
         closing = restaurant.closing_time
         opening = restaurant.opening_time
+        last_res = restaurant.last_res_time
 
+
+        if last_res < cleaned_time:
+            self.add_error('time', f'Restaurant does not accept reservations past {last_res}')
         if restaurant.open_past_midnight():
             if closing < cleaned_time and cleaned_time < opening:
                 self.add_error('time', 'Restaurant not open at that time')
         else:
             if cleaned_time < opening or closing < cleaned_time:
                 self.add_error('time', 'Restaurant not open at that time')
-
         return cleaned_time
 
     def clean_date(self):
@@ -66,6 +69,7 @@ class ReservationForm(ModelForm):
 class RestaurantForm(ModelForm):
     opening_time = TimeField(widget=TimeInput(attrs={'type': 'time' }))
     closing_time = TimeField(widget=TimeInput(attrs={'type': 'time' }))
+    last_res_time = TimeField(widget=TimeInput(attrs={'type': 'time' }))
     name = CharField()
     address = CharField()
     phone = CharField()
@@ -76,7 +80,7 @@ class RestaurantForm(ModelForm):
 
     class Meta:
         model = Restaurant
-        fields = ['name', 'description', 'address', 'phone', 'capacity', 'opening_time', 'closing_time', 'image', 'category']
+        fields = ['name', 'description', 'address', 'phone', 'capacity', 'opening_time', 'closing_time', 'last_res_time', 'image', 'category']
 
 class ProfileForm(ModelForm):
     first_name = CharField()
