@@ -6,6 +6,7 @@ from django.views.decorators.http import require_http_methods
 from restaurants.forms import LoginForm, ProfileForm, ReservationForm, RestaurantForm
 from restaurants.models import Category, Profile, Restaurant
 from datetime import datetime, timedelta
+from django.db.models import Count
 
 def restaurants_list(request):
     restaurants = Restaurant.objects.all()
@@ -20,9 +21,9 @@ def restaurant_show(request, id):
         context['reservation_form'] = ReservationForm()
     if request.user == restaurant.owner:
         start_date = datetime.today()
-        end_date = start_date + timedelta(weeks=26)
-        restaurant.reservations.filter(date__range=[start_date, end_date])
-        context["vip"] = restaurant.reservations.raw("SELECT * FROM user WHERE COUNT >= 3 AND date < %s" %(end_date)) 
+        end_date = start_date - timedelta(weeks=26)
+        vip_count = restaurant.reservations.filter(date__range=(start_date, end_date))
+        vip_count = vip_count
     return render(request, 'restaurant_details.html', context)
 
 @login_required
